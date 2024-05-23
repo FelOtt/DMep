@@ -58,15 +58,12 @@ namespace FileEncryptor
                     aes.Key = key;
                     aes.IV = iv;
 
-                    // Write IV
                     fsOutput.Write(iv, 0, iv.Length);
 
-                    // Write original filename length and original filename
                     byte[] fileNameBytes = Encoding.UTF8.GetBytes(fileNameWithoutExtension);
                     fsOutput.Write(BitConverter.GetBytes(fileNameBytes.Length), 0, sizeof(int));
                     fsOutput.Write(fileNameBytes, 0, fileNameBytes.Length);
 
-                    // Write file extension length and file extension
                     byte[] fileExtensionBytes = Encoding.UTF8.GetBytes(fileExtension);
                     fsOutput.Write(BitConverter.GetBytes(fileExtensionBytes.Length), 0, sizeof(int));
                     fsOutput.Write(fileExtensionBytes, 0, fileExtensionBytes.Length);
@@ -100,9 +97,8 @@ namespace FileEncryptor
                 using (FileStream fsInput = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                 {
                     byte[] iv = new byte[16];
-                    fsInput.Read(iv, 0, iv.Length); // Read IV from the beginning of the file
+                    fsInput.Read(iv, 0, iv.Length);
 
-                    // Read original filename length and original filename
                     byte[] lengthBuffer = new byte[sizeof(int)];
                     fsInput.Read(lengthBuffer, 0, lengthBuffer.Length);
                     int fileNameLength = BitConverter.ToInt32(lengthBuffer, 0);
@@ -111,7 +107,6 @@ namespace FileEncryptor
                     fsInput.Read(fileNameBytes, 0, fileNameBytes.Length);
                     string originalFileName = Encoding.UTF8.GetString(fileNameBytes);
 
-                    // Read file extension length and file extension
                     fsInput.Read(lengthBuffer, 0, lengthBuffer.Length);
                     int fileExtensionLength = BitConverter.ToInt32(lengthBuffer, 0);
 

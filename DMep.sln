@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34728.123
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DMep", "DMep\DMep.csproj", "{0A7EE7FD-EC9E-4DC5-828F-B301AED73716}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0A7EE7FD-EC9E-4DC5-828F-B301AED73716}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A7EE7FD-EC9E-4DC5-828F-B301AED73716}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A7EE7FD-EC9E-4DC5-828F-B301AED73716}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A7EE7FD-EC9E-4DC5-828F-B301AED73716}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {03967A71-3744-4C4C-B781-8D6A06908570}
+	EndGlobalSection
+EndGlobal

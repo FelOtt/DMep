@@ -37,7 +37,7 @@ namespace FileEncryptor
         private static void EncryptFile()
         {
             Console.Write("Enter the path of the file to encrypt: ");
-            string filePath = Console.ReadLine();
+            string filePath = Console.ReadLine().Trim('"');
 
             Console.Write("Enter the encryption password: ");
             string password = Console.ReadLine();
@@ -85,7 +85,7 @@ namespace FileEncryptor
         private static void DecryptFile()
         {
             Console.Write("Enter the path of the file to decrypt: ");
-            string filePath = Console.ReadLine();
+            string filePath = Console.ReadLine().Trim('"');
 
             Console.Write("Enter the decryption password: ");
             string password = Console.ReadLine();

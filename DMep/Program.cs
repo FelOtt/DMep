@@ -9,6 +9,7 @@ namespace FileEncryptor
     {
         static void Main(string[] args)
         {
+            Console.Title = "DMep";
             while (true)
             {
                 Console.WriteLine("Choose mode: (E)ncrypt, (D)ecrypt, or (Q)uit");
@@ -42,8 +43,9 @@ namespace FileEncryptor
             Console.Write("Enter the encryption password: ");
             string password = Console.ReadLine();
 
-            string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(filePath);
-            string destFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileNameWithoutExtension + ".dmef");
+            Console.Write("Enter the desired name of the file: ");
+            string fileName = Console.ReadLine();
+            string destFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName + ".dmef");
 
             try
             {
@@ -60,7 +62,7 @@ namespace FileEncryptor
 
                     fsOutput.Write(iv, 0, iv.Length);
 
-                    byte[] fileNameBytes = Encoding.UTF8.GetBytes(fileNameWithoutExtension);
+                    byte[] fileNameBytes = Encoding.UTF8.GetBytes(fileName);
                     fsOutput.Write(BitConverter.GetBytes(fileNameBytes.Length), 0, sizeof(int));
                     fsOutput.Write(fileNameBytes, 0, fileNameBytes.Length);
 

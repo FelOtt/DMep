@@ -2,6 +2,7 @@
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using System.IO.Compression;
 
 namespace FileEncryptor
 {
@@ -71,8 +72,9 @@ namespace FileEncryptor
                     fsOutput.Write(fileExtensionBytes, 0, fileExtensionBytes.Length);
 
                     using (CryptoStream cs = new CryptoStream(fsOutput, aes.CreateEncryptor(), CryptoStreamMode.Write))
+                    using (GZipStream gzs = new GZipStream(cs, CompressionMode.Compress))
                     {
-                        fsInput.CopyTo(cs);
+                        fsInput.CopyTo(gzs);
                     }
                 }
 
@@ -125,8 +127,9 @@ namespace FileEncryptor
                         aes.IV = iv;
 
                         using (CryptoStream cs = new CryptoStream(fsInput, aes.CreateDecryptor(), CryptoStreamMode.Read))
+                        using (GZipStream gzs = new GZipStream(cs, CompressionMode.Decompress))
                         {
-                            cs.CopyTo(fsOutput);
+                            gzs.CopyTo(fsOutput);
                         }
                     }
 

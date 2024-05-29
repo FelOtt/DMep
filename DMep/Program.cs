@@ -48,6 +48,10 @@ namespace FileEncryptor
             string fileName = Console.ReadLine();
             string destFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName + ".dmef");
 
+            Console.Write("Do you want to compress the file before encryption? (Y/N): ");
+            bool compress = Console.ReadKey().KeyChar.ToString().ToLower() == "y";
+            Console.WriteLine();
+
             try
             {
                 byte[] key = CreateKey(password);
@@ -71,10 +75,21 @@ namespace FileEncryptor
                     fsOutput.Write(BitConverter.GetBytes(fileExtensionBytes.Length), 0, sizeof(int));
                     fsOutput.Write(fileExtensionBytes, 0, fileExtensionBytes.Length);
 
+                    fsOutput.WriteByte((byte)(compress ? 1 : 0)); // Write the compression flag
+
                     using (CryptoStream cs = new CryptoStream(fsOutput, aes.CreateEncryptor(), CryptoStreamMode.Write))
-                    using (GZipStream gzs = new GZipStream(cs, CompressionMode.Compress))
                     {
-                        fsInput.CopyTo(gzs);
+                        if (compress)
+                        {
+                            using (GZipStream gzs = new GZipStream(cs, CompressionMode.Compress))
+                            {
+                                fsInput.CopyTo(gzs);
+                            }
+                        }
+                        else
+                        {
+                            fsInput.CopyTo(cs);
+                        }
                     }
                 }
 
@@ -118,6 +133,8 @@ namespace FileEncryptor
                     fsInput.Read(fileExtensionBytes, 0, fileExtensionBytes.Length);
                     string fileExtension = Encoding.UTF8.GetString(fileExtensionBytes);
 
+                    bool compress = fsInput.ReadByte() == 1; // Read the compression flag
+
                     string destFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, originalFileName + fileExtension);
 
                     using (FileStream fsOutput = new FileStream(destFilePath, FileMode.Create, FileAccess.Write))
@@ -127,9 +144,18 @@ namespace FileEncryptor
                         aes.IV = iv;
 
                         using (CryptoStream cs = new CryptoStream(fsInput, aes.CreateDecryptor(), CryptoStreamMode.Read))
-                        using (GZipStream gzs = new GZipStream(cs, CompressionMode.Decompress))
                         {
-                            gzs.CopyTo(fsOutput);
+                            if (compress)
+                            {
+                                using (GZipStream gzs = new GZipStream(cs, CompressionMode.Decompress))
+                                {
+                                    gzs.CopyTo(fsOutput);
+                                }
+                            }
+                            else
+                            {
+                                cs.CopyTo(fsOutput);
+                            }
                         }
                     }
 

@@ -14,8 +14,8 @@ namespace FileEncryptor
             while (true)
             {
                 Console.WriteLine("Choose mode: (E)ncrypt, (D)ecrypt, or (Q)uit");
-                char mode = Console.ReadKey().KeyChar;
-                Console.WriteLine();
+                char mode = Console.ReadKey(true).KeyChar; // The `true` argument hides the character input
+                Console.WriteLine(); // This ensures the input is not displayed
 
                 if (mode == 'E' || mode == 'e')
                 {
@@ -44,9 +44,9 @@ namespace FileEncryptor
             Console.Write("Enter the encryption password: ");
             string password = Console.ReadLine();
 
-            Console.Write("Enter the desired name of the file: ");
-            string fileName = Console.ReadLine();
-            string destFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName + ".dmef");
+            Console.Write("Enter the desired name of the encrypted file (without extension): ");
+            string encryptedFileName = Console.ReadLine();
+            string destFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, encryptedFileName + ".dmef");
 
             Console.Write("Do you want to compress the file before encryption? (Y/N): ");
             bool compress = Console.ReadKey().KeyChar.ToString().ToLower() == "y";
@@ -57,6 +57,7 @@ namespace FileEncryptor
                 byte[] key = CreateKey(password);
                 byte[] iv = CreateIV();
                 string fileExtension = Path.GetExtension(filePath);
+                string originalFileName = Path.GetFileName(filePath); // Get the original filename
 
                 using (FileStream fsInput = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                 using (FileStream fsOutput = new FileStream(destFilePath, FileMode.Create, FileAccess.Write))
@@ -67,9 +68,10 @@ namespace FileEncryptor
 
                     fsOutput.Write(iv, 0, iv.Length);
 
-                    byte[] fileNameBytes = Encoding.UTF8.GetBytes(fileName);
-                    fsOutput.Write(BitConverter.GetBytes(fileNameBytes.Length), 0, sizeof(int));
-                    fsOutput.Write(fileNameBytes, 0, fileNameBytes.Length);
+                    // Store the original filename
+                    byte[] originalFileNameBytes = Encoding.UTF8.GetBytes(originalFileName);
+                    fsOutput.Write(BitConverter.GetBytes(originalFileNameBytes.Length), 0, sizeof(int));
+                    fsOutput.Write(originalFileNameBytes, 0, originalFileNameBytes.Length);
 
                     byte[] fileExtensionBytes = Encoding.UTF8.GetBytes(fileExtension);
                     fsOutput.Write(BitConverter.GetBytes(fileExtensionBytes.Length), 0, sizeof(int));
@@ -101,6 +103,7 @@ namespace FileEncryptor
             }
         }
 
+
         private static void DecryptFile()
         {
             Console.Write("Enter the path of the file to decrypt: ");
@@ -118,13 +121,14 @@ namespace FileEncryptor
                     byte[] iv = new byte[16];
                     fsInput.Read(iv, 0, iv.Length);
 
+                    // Read the original filename length and value
                     byte[] lengthBuffer = new byte[sizeof(int)];
                     fsInput.Read(lengthBuffer, 0, lengthBuffer.Length);
-                    int fileNameLength = BitConverter.ToInt32(lengthBuffer, 0);
+                    int originalFileNameLength = BitConverter.ToInt32(lengthBuffer, 0);
 
-                    byte[] fileNameBytes = new byte[fileNameLength];
-                    fsInput.Read(fileNameBytes, 0, fileNameBytes.Length);
-                    string originalFileName = Encoding.UTF8.GetString(fileNameBytes);
+                    byte[] originalFileNameBytes = new byte[originalFileNameLength];
+                    fsInput.Read(originalFileNameBytes, 0, originalFileNameBytes.Length);
+                    string originalFileName = Encoding.UTF8.GetString(originalFileNameBytes);
 
                     fsInput.Read(lengthBuffer, 0, lengthBuffer.Length);
                     int fileExtensionLength = BitConverter.ToInt32(lengthBuffer, 0);
@@ -135,7 +139,8 @@ namespace FileEncryptor
 
                     bool compress = fsInput.ReadByte() == 1; // Read the compression flag
 
-                    string destFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, originalFileName + fileExtension);
+                    // Use the original filename with its extension
+                    string destFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, originalFileName);
 
                     using (FileStream fsOutput = new FileStream(destFilePath, FileMode.Create, FileAccess.Write))
                     using (Aes aes = Aes.Create())
@@ -167,6 +172,7 @@ namespace FileEncryptor
                 Console.WriteLine("An error occurred during decryption: " + ex.Message);
             }
         }
+
 
         private static byte[] CreateKey(string password)
         {
